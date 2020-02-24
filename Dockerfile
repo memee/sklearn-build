@@ -38,8 +38,9 @@ RUN source lambda_build/bin/activate && \
     LIBDIR="${VIRTUAL_ENV}/lib/python3.8/site-packages/lib/" && \
     mkdir -p ${LIBDIR} && \
     cp /usr/lib64/atlas/* $LIBDIR && \
-    cp /usr/lib64/libquadmath.so.0 $LIBDIR && \
-    cp /usr/lib64/libgfortran.so.4 $LIBDIR && \
+    cp /usr/lib64/libquadmath.so.0 ${LIBDIR} && \
+    cp /usr/lib64/libgfortran.so.4 ${LIBDIR} && \
+    cp /usr/lib64/libgomp.so.1 ${LIBDIR} && \
     # Strip
     find ${VIRTUAL_ENV}/lib/python3.8/site-packages/ -name "*.so" | xargs strip && \
     # Zip
