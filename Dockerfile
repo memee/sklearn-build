@@ -43,12 +43,13 @@ RUN source lambda_build/bin/activate && \
     # Strip
     find ${VIRTUAL_ENV}/lib/python3.8/site-packages/ -name "*.so" | xargs strip && \
     # Zip
-    cd ${VIRTUAL_ENV}/lib/python3.8/site-packages/ && \
-    zip -r -9 -q /build/output.zip * && \
+    cd ${VIRTUAL_ENV}/lib/python3.8/ && \
+    mv site-packages/ python/ && \
+    zip -r -9 -q /build/layer.zip python/ && \
     rm -rf /root/.cache /var/cache/yum && yum clean all
 
 # 2. Copy Data Stage
 FROM amazonlinux:2017.03.1.20170812
 WORKDIR /build
-COPY --from=build /build/output.zip .
-CMD cp /build/output.zip /outputs
+COPY --from=build /build/layer.zip .
+CMD cp /build/layer.zip /outputs
