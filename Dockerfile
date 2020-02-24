@@ -34,7 +34,7 @@ RUN source lambda_build/bin/activate && \
 
 # Copy shared libraries into lib and zip
 RUN source lambda_build/bin/activate && \
-    pip uninstall -y wheel pip && \ 
+    pip uninstall -y wheel pip cython && \
     LIBDIR="${VIRTUAL_ENV}/lib/python3.8/site-packages/lib/" && \
     mkdir -p ${LIBDIR} && \
     cp /usr/lib64/atlas/* $LIBDIR && \
