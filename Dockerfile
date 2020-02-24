@@ -1,17 +1,8 @@
-
-# 1. Build stage 
-FROM amazonlinux:2017.03.1.20170812 AS build
+# 1. Build stage
+FROM lambci/lambda:build-python3.8 AS build
 
 RUN yum update -y && \
     yum install -y \
-    # python 
-    python36 \
-    python36-devel \
-    python36-virtualenv \
-    python36-setuptools \
-    # compilers
-    gcc \
-    gcc-c++ \
     # utils
     findutils \
     zip \
@@ -24,30 +15,35 @@ RUN yum update -y && \
 
 WORKDIR /build
 
-# Create VENV and install pip3.6
-RUN python3.6 -m venv --copies lambda_build && \
+# Create VENV and use pip to install everything
+RUN python -m venv --copies lambda_build && \
     chmod +x lambda_build/bin/activate && \
     source lambda_build/bin/activate && \
-    pip3.6 install --upgrade pip wheel
+    pip install --upgrade pip wheel
 
 COPY ./requirements.txt requirements.txt
 
 # Install everything
+# we temporarily not do it from requirements file
 RUN source lambda_build/bin/activate && \
-    pip3.6 install -r requirements.txt
+    pip install --upgrade pip wheel && \
+    pip install --no-binary :all: cython && \
+    pip install --no-binary :all: numpy && \
+    pip install --no-binary :all: scipy && \
+    pip install --no-binary :all: scikit-learn
 
 # Copy shared libraries into lib and zip
 RUN source lambda_build/bin/activate && \
     pip uninstall -y wheel pip && \ 
-    LIBDIR="$VIRTUAL_ENV/lib/python3.6/site-packages/lib/" && \
-    mkdir -p $LIBDIR && \
+    LIBDIR="${VIRTUAL_ENV}/lib/python3.8/site-packages/lib/" && \
+    mkdir -p ${LIBDIR} && \
     cp /usr/lib64/atlas/* $LIBDIR && \
     cp /usr/lib64/libquadmath.so.0 $LIBDIR && \
-    cp /usr/lib64/libgfortran.so.3 $LIBDIR && \
+    cp /usr/lib64/libgfortran.so.4 $LIBDIR && \
     # Strip
-    find $VIRTUAL_ENV/lib/python3.6/site-packages/ -name "*.so" | xargs strip && \
+    find ${VIRTUAL_ENV}/lib/python3.8/site-packages/ -name "*.so" | xargs strip && \
     # Zip
-    cd $VIRTUAL_ENV/lib/python3.6/site-packages/ && \
+    cd ${VIRTUAL_ENV}/lib/python3.8/site-packages/ && \
     zip -r -9 -q /build/output.zip * && \
     rm -rf /root/.cache /var/cache/yum && yum clean all
 
