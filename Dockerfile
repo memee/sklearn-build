@@ -30,7 +30,8 @@ RUN source lambda_build/bin/activate && \
     pip install --no-binary :all: cython && \
     pip install --no-binary :all: numpy && \
     pip install --no-binary :all: scipy && \
-    pip install --no-binary :all: scikit-learn
+    pip install --no-binary :all: scikit-learn && \
+    pip install --no-binary :all: pandas 
 
 # Copy shared libraries into lib and zip
 RUN source lambda_build/bin/activate && \
